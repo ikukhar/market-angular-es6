@@ -1,0 +1,64 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Generic Plastic Fish",
+      "description": "Laborum rerum ea consectetur possimus itaque quod.",
+      "price": "615.00"
+    },
+    {
+      "id": 2,
+      "name": "Awesome Fresh Salad",
+      "description": "Fugiat sit dolores velit dolore est commodi ullam qui occaecati.",
+      "price": "980.00"
+    },
+    {
+      "id": 3,
+      "name": "Generic Steel Pizza",
+      "description": "Ut magni rerum.",
+      "price": "68.00"
+    },
+    {
+      "id": 4,
+      "name": "Licensed Cotton Fish",
+      "description": "Et explicabo ab ut sit necessitatibus eligendi optio.",
+      "price": "713.00"
+    },
+    {
+      "id": 5,
+      "name": "Refined Plastic Chips",
+      "description": "Dolorem aut animi eveniet.",
+      "price": "272.00"
+    },
+    {
+      "id": 6,
+      "name": "Intelligent Cotton Computer",
+      "description": "Qui reprehenderit voluptas quia in repellat quis.",
+      "price": "231.00"
+    },
+    {
+      "id": 7,
+      "name": "Small Rubber Towels",
+      "description": "Tempora ipsam eligendi voluptatem impedit odio.",
+      "price": "283.00"
+    },
+    {
+      "id": 8,
+      "name": "Refined Cotton Soap",
+      "description": "Rerum fugiat in praesentium commodi pariatur dolores aperiam alias mollitia.",
+      "price": "170.00"
+    },
+    {
+      "id": 9,
+      "name": "Rustic Concrete Mouse",
+      "description": "Ipsam sed qui atque sequi.",
+      "price": "206.00"
+    },
+    {
+      "id": 10,
+      "name": "Generic Metal Shirt",
+      "description": "Tempore aliquam ut odio tempore officiis.",
+      "price": "502.00"
+    }
+  ]
+}

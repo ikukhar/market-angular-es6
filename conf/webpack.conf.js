@@ -31,6 +31,10 @@ module.exports = {
         ]
       },
       {
+        test: /\.woff2?$|\.ttf$|\.eot$|\.svg$/,
+        loader: "file-loader"
+      },
+      {
         test: /\.js$/,
         exclude: /node_modules/,
         loaders: [
@@ -65,5 +69,11 @@ module.exports = {
     path: path.join(process.cwd(), conf.paths.tmp),
     filename: 'index.js'
   },
-  entry: `./${conf.path.src('index')}`
+  entry: `./${conf.path.src('index')}`,
+  resolve: {
+    modules: [
+      path.resolve(conf.path.src('app')),
+      path.resolve('./node_modules')
+    ]
+  },
 };
