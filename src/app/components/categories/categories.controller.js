@@ -2,12 +2,12 @@
 class CategoriesController {
   constructor(CategoriesService) {
     'ngInject';
-    this.categoriesService = CategoriesService;
-    this.selectedCategories = this.categoriesService.getSelected();
+    this.CategoriesService = CategoriesService;
+    this.selectedCategories = this.CategoriesService.getSelected();
   }
 
   $onInit() {
-    this.categoriesService.getCategories().then(
+    this.CategoriesService.getCategories().then(
       categories => {
         this.categories = categories;
       }
@@ -25,7 +25,7 @@ class CategoriesController {
   }
 
   select(cat) {
-    this.selectedCategories = this.categoriesService.select(cat);
+    this.selectedCategories = this.CategoriesService.select(cat);
     onSelect.call(this);
   }
 }

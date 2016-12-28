@@ -3,13 +3,13 @@ import _ from 'lodash';
 class ProductListController {
   constructor(ProductsService, $scope) {
     'ngInject';
-    this.productsService = ProductsService;
+    this.ProductsService = ProductsService;
     this.$scope = $scope;
     this.filterCategories = [];
   }
 
   $onInit() {
-    this.productsService.getProducts().then(
+    this.ProductsService.getProducts().then(
       products => {
         this.products = products;
       }
