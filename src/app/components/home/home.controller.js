@@ -5,6 +5,10 @@ class HomeController {
 
   $onInit() {
   }
+
+  onSelectCategory($event) {
+    this.filterCategories = $event.categories;
+  }
 }
 
 export default HomeController;

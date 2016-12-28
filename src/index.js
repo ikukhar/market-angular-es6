@@ -1,4 +1,5 @@
 import angular from 'angular';
+import 'angular-local-storage';
 
 import ServicesModule from 'modules/services.module.js';
 import ComponentsModule from 'modules/components.module.js';
@@ -11,5 +12,8 @@ import 'bootstrap-loader';
 export const app = 'app';
 
 angular
-  .module(app, ['ui.router', ServicesModule, ComponentsModule])
+  .module(app, ['ui.router',
+                'LocalStorageModule',
+                ServicesModule,
+                ComponentsModule])
   .config(routesConfig);

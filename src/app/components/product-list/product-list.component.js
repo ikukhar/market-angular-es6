@@ -3,7 +3,10 @@ import ProductListTemplate from './product-list.html';
 
 const ProductListComponent = {
   controller: ProductListController,
-  template: ProductListTemplate
+  template: ProductListTemplate,
+  bindings: {
+    filterCategories: '<'
+  }
 };
 
 export default ProductListComponent;
