@@ -21,6 +21,7 @@ class CategoriesService {
   select(cat) {
     let selectedCategories = this.getSelected();
     let i = selectedCategories.findIndex(x => x.id === cat.id);
+
     if (i === -1) {
       selectedCategories.push(cat);
     } else {

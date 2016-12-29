@@ -9,5 +9,9 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
     .state('home', {
       url: '/',
       component: 'home'
+    })
+    .state('cart', {
+      url: '/cart',
+      component: 'cart'
     });
 }

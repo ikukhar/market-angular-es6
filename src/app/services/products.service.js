@@ -16,13 +16,17 @@ class ProductsService {
   }
 
   getProduct(id) {
-    return this.$http.get('data/products.json').then(
-      data => {
-        let products = data.data;
+    return this.getProducts().then(
+      products => {
         return products.find(p => p.id === id);
-      },
-      error => {
-        this.$log.log(error);
+      });
+  }
+
+  getByIds(ids) {
+    return this.getProducts().then(products => {
+        return products.filter(x => {
+          return (ids.indexOf(x.id) === -1) ? false : true;
+        });
       });
   }
 }
