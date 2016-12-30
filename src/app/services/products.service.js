@@ -8,6 +8,7 @@ class ProductsService {
   getProducts() {
     return this.$http.get('data/products.json').then(
       data => {
+        data.data.forEach(x => x.id = x.id.toString());
         return data.data;
       },
       error => {
@@ -15,12 +16,12 @@ class ProductsService {
       });
   }
 
-  getProduct(id) {
-    return this.getProducts().then(
-      products => {
-        return products.find(p => p.id === id);
-      });
-  }
+  // getProduct(id) {
+  //   return this.getProducts().then(
+  //     products => {
+  //       return products.find(p => p.id === id);
+  //     });
+  // }
 
   getByIds(ids) {
     return this.getProducts().then(products => {

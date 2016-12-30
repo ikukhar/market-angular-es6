@@ -5,7 +5,7 @@ class CartButtonController {
   }
 
   count() {
-    return this.CartService.countProducts();
+    return this.CartService.totalCount();
   }
 }
 

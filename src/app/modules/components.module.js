@@ -6,6 +6,7 @@ import ProductComponent     from 'components/product/product.component';
 import CategoriesComponent  from 'components/categories/categories.component';
 import CartComponent        from 'components/cart/cart.component';
 import CartButtonComponent  from 'components/cart-button/cart-button.component';
+import CheckoutButtonComponent  from 'components/checkout-button/checkout-button.component';
 
 const ComponentsModule = angular
   .module('app.components', [])
@@ -16,6 +17,7 @@ const ComponentsModule = angular
     .component('categories', CategoriesComponent)
     .component('cart', CartComponent)
     .component('cartButton', CartButtonComponent)
+    .component('checkoutButton', CheckoutButtonComponent)
     .name;
 
 export default ComponentsModule;

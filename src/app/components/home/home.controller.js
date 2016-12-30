@@ -3,9 +3,6 @@ class HomeController {
     'ngInject';
   }
 
-  $onInit() {
-  }
-
   onSelectCategory($event) {
     this.filterCategories = $event.categories;
   }

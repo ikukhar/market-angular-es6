@@ -2,7 +2,9 @@ $icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
 @import "app/components/categories/categories";
-@import "app/components/cart-button/cart-button"; 
+@import "app/components/cart-button/cart-button";
+@import "app/components/cart/cart";
+@import "app/components/checkout-button/checkout-button"; 
 
 body {
   // background-color: lightgrey;

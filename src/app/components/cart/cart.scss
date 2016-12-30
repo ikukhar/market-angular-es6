@@ -1,0 +1,35 @@
+.cart{
+  &-product{
+    position: relative;
+    .title {
+      font-size: 2rem;
+    }
+    .price {
+      font-size: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    .btn-minus, .count, .btn-plus {
+      float: left;
+    }
+    .count {
+      font-size: 2rem;
+      margin: 0 10px;
+    }
+    .btn-remove {
+      position: absolute;
+      top: 15px;
+      right: -55px;
+      border: 0;
+      color: initial;
+      background-color: initial;
+      &:hover {
+        background-color: #d9534f;
+      }
+    }
+  }
+  .total-price {
+    font-size: 2rem;
+    font-weight: 600;
+  }
+}

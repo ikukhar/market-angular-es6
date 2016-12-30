@@ -1,0 +1,29 @@
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-9">
+
+    <div class="cart">
+      <div class="cart-product thumbnail" ng-repeat="product in $ctrl.products">
+        <div class="title pull-left">{{ product.name }}</div>
+        <div class="pull-right">
+
+          <a class="btn btn-default btn-minus" ng-click="$ctrl.down(product)"><span class="glyphicon glyphicon-minus"></span></a>
+          <div class="count">{{ product.count }}</div>
+          <a class="btn btn-default btn-plus" ng-click="$ctrl.up(product)"><span class="glyphicon glyphicon-plus"></span></a>
+
+          <div class ="price">{{ product.totalPrice | currency:"$" }}</div>
+        </div>
+        <div class="clearfix"></div>
+        <a class="btn btn-danger btn-remove" ng-click="$ctrl.remove(product)"><span class="glyphicon glyphicon-remove"></span></a>
+      </div>
+      <div class="total-price pull-right">{{ $ctrl.totalPrice() | currency:"$" }}</div>
+    </div>
+
+    <div class="clearfix"></div>
+    <hr>
+    <checkout-button class="pull-right"></checkout-button>
+
+    </div>
+  </div>
+
+</div>
