@@ -10,5 +10,6 @@ app.get('*', function(req, res) {
   res.sendfile('./dist/index.html'); // load the single view file (angular will handle the page changes on the front-end)
 });
 
-app.listen(5000);
-console.log("App listening on port 5000");
+var port = process.env.PORT || 5000;
+app.listen(port);
+console.log("App listening on port "+port);
