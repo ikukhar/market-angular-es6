@@ -1,0 +1,8 @@
+<div ng-show="$ctrl.isAuthenticated()">
+  <span class="glyphicon glyphicon-user"></span>
+  <a ng-click="$ctrl.logout()" href="">Log Out</a>
+</div>
+
+<div ng-hide="$ctrl.isAuthenticated()">
+  <a ng-click="$ctrl.login()" href="">Log In</a>
+</div>

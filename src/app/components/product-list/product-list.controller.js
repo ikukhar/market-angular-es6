@@ -9,11 +9,11 @@ class ProductListController {
   }
 
   $onInit() {
-    this.ProductsService.getProducts().then(
-      products => {
-        this.products = products;
-      }
-    );
+    // this.ProductsService.getProducts().then(
+    //   products => {
+    //     this.products = products;
+    //   }
+    // );
   }
 
   filteredProducts() {

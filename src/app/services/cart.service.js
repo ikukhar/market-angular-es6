@@ -1,8 +1,9 @@
 class CartService {
-  constructor(ProductsService, localStorageService) {
+  constructor(ProductsService, localStorageService, $q) {
     'ngInject';
     this.ProductsService = ProductsService;
     this.localStorageService = localStorageService;
+    this.$q = $q;
     this.cart = [];
     this.totals = {
       count: 0,
@@ -31,6 +32,11 @@ class CartService {
     if (this.cart[product.id]) {
       delete this.cart[product.id];
     }
+    this.save();
+  }
+
+  cleanCart() {
+    this.cart = {};
     this.save();
   }
 
@@ -87,6 +93,13 @@ class CartService {
   calcTotal() {
     this.totals.count = Object.keys(this.cart).length;
     this.totals.price = Object.values(this.cart).reduce(((sum, x) => sum + x.totalPrice), 0);
+  }
+
+  buy() {
+    let deffered = this.$q.defer();
+    this.cleanCart();
+    deffered.resolve();
+    return deffered.promise;
   }
 }
 

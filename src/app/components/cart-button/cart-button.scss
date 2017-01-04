@@ -1,21 +1,25 @@
-.cart-button {
+cart-button {
+  display: inline-block;
+  padding-right: 15px;
   position: relative;
   top: 10px;
-  .glyphicon-shopping-cart {
-    font-size: 3rem;
-    color: gray;
-  }
-  .count {
-    position: absolute;
-    display: inline-block;
-    box-sizing: border-box;
-    font-size: 1.5rem;
-    line-height: 1.5rem;
-    padding: .1rem .4rem;
-    top: -.3rem;
-    right: -1rem;
-    border-radius: .5rem;
-    background: darkmagenta;
-    color: white;
+  .cart-button {
+    .glyphicon-shopping-cart {
+      font-size: 3rem;
+      color: rgba(255, 255, 255, 0.843137);
+    }
+    .count {
+      position: absolute;
+      display: inline-block;
+      box-sizing: border-box;
+      font-size: 1.5rem;
+      line-height: 1.5rem;
+      padding: .1rem .4rem;
+      top: -.3rem;
+      right: 1rem;
+      border-radius: .5rem;
+      background: darkmagenta;
+      color: white;
+    }
   }
 }

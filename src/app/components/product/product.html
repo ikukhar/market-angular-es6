@@ -1,4 +1,4 @@
-<h2>{{$ctrl.product.name}}</h2>
-<p>{{$ctrl.product.description}}</p>
-<p>{{$ctrl.product.price}}</p>
-<p><a class="btn btn-default" href="#" role="button" ng-click="$ctrl.addToCart()">Add to cart</a></p>
+<h2>{{ $ctrl.product.name }}</h2>
+<p>{{ $ctrl.product.description }}</p>
+<p class="price">{{ $ctrl.product.price | currency:"$" }}</p>
+<p><a class="btn btn-default btn-add-to-cart" href="#" role="button" ng-click="$ctrl.addToCart()">Add to cart</a></p>

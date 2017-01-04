@@ -5,7 +5,8 @@ const ProductListComponent = {
   controller: ProductListController,
   template: ProductListTemplate,
   bindings: {
-    filterCategories: '<'
+    filterCategories: '<',
+    products: '<'
   }
 };
 

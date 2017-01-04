@@ -3,15 +3,27 @@ export default routesConfig;
 /** @ngInject */
 function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
   $locationProvider.html5Mode(true).hashPrefix('!');
-  $urlRouterProvider.otherwise('/');
+  $urlRouterProvider.otherwise('/products');
 
+  /** @ngInject */
   $stateProvider
-    .state('home', {
-      url: '/',
-      component: 'home'
+    .state('products', {
+      url: '/products',
+      component: 'products',
+      resolve: {
+        products: ProductsService => ProductsService.getProducts()
+      }
     })
     .state('cart', {
       url: '/cart',
-      component: 'cart'
+      component: 'cart',
+      resolve: {
+        products: CartService => CartService.getProducts()
+      }
+    })
+    .state('checkout', {
+      url: '/checkout',
+      component: 'checkout',
+      onEnter: AccessService => AccessService.isAuthenticated()
     });
 }

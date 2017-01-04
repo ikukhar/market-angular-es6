@@ -5,7 +5,7 @@ class CartController {
   }
 
   $onInit() {
-    this.loadProducts();
+    // this.loadProducts();
   }
 
   loadProducts() {

@@ -1,0 +1,18 @@
+product {
+  display: inline-block;
+  padding: 0 15px;
+  border: 1px solid #888888;
+  // box-shadow: 5px 5px 5px #888888;
+  margin: 15px 0;
+  &:hover {
+    background-color: #eee;
+  }
+  .price {
+    text-align: right;
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  .btn-add-to-cart {
+    border: 1px solid orange;
+  }
+}

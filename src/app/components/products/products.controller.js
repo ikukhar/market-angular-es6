@@ -1,4 +1,4 @@
-class HomeController {
+class ProductsController {
   constructor() {
     'ngInject';
   }
@@ -8,4 +8,4 @@ class HomeController {
   }
 }
 
-export default HomeController;
+export default ProductsController;

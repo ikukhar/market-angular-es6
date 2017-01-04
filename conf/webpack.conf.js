@@ -74,6 +74,9 @@ module.exports = {
     modules: [
       path.resolve(conf.path.src('app')),
       path.resolve('./node_modules')
-    ]
+    ],
+    alias: {
+      spin: 'spin.js'
+    }
   },
 };

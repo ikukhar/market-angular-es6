@@ -16,13 +16,6 @@ class ProductsService {
       });
   }
 
-  // getProduct(id) {
-  //   return this.getProducts().then(
-  //     products => {
-  //       return products.find(p => p.id === id);
-  //     });
-  // }
-
   getByIds(ids) {
     return this.getProducts().then(products => {
         return products.filter(x => {
