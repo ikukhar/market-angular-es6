@@ -8,11 +8,11 @@ product {
     background-color: #eee;
   }
   .price {
-    text-align: right;
     font-size: 2rem;
     font-weight: bold;
   }
   .btn-add-to-cart {
     border: 1px solid orange;
+    display: block;
   }
 }

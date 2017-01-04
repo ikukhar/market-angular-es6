@@ -26,6 +26,7 @@ angular
                 ComponentsModule])
   .config(routesConfig)
   .config(usSpinnerConfigProvider => {
+    'ngInject';
     usSpinnerConfigProvider.setDefaults({radius: 60});
   })
   .run(run);

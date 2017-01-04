@@ -31,6 +31,10 @@ module.exports = {
         })
       },
       {
+        test: /\.woff2?$|\.ttf$|\.eot$|\.svg$/,
+        loader: "file-loader"
+      },
+      {
         test: /\.js$/,
         exclude: /node_modules/,
         loaders: [
@@ -53,9 +57,10 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: conf.path.src('index.html')
     }),
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {unused: true, dead_code: true, warnings: false} // eslint-disable-line camelcase
-    }),
+    // new webpack.optimize.UglifyJsPlugin({
+    //   compress: {unused: true, dead_code: true, warnings: false},
+    //   output: {beautify: true}
+    // }),
     new ExtractTextPlugin('index-[contenthash].css'),
     new webpack.optimize.CommonsChunkPlugin({name: 'vendor'}),
     new webpack.LoaderOptionsPlugin({
@@ -71,5 +76,14 @@ module.exports = {
   entry: {
     app: `./${conf.path.src('index')}`,
     vendor: Object.keys(pkg.dependencies)
-  }
+  },
+  resolve: {
+    modules: [
+      path.resolve(conf.path.src('app')),
+      path.resolve('./node_modules')
+    ],
+    alias: {
+      spin: 'spin.js'
+    }
+  },
 };

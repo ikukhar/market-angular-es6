@@ -11,19 +11,28 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
       url: '/products',
       component: 'products',
       resolve: {
-        products: ProductsService => ProductsService.getProducts()
+        products: ProductsService => {
+          'ngInject';
+          return ProductsService.getProducts();
+        }
       }
     })
     .state('cart', {
       url: '/cart',
       component: 'cart',
       resolve: {
-        products: CartService => CartService.getProducts()
+        products: CartService => {
+          'ngInject';
+          return CartService.getProducts();
+        }
       }
     })
     .state('checkout', {
       url: '/checkout',
       component: 'checkout',
-      onEnter: AccessService => AccessService.isAuthenticated()
+      onEnter: AccessService => {
+        'ngInject';
+        return AccessService.isAuthenticated();
+      }
     });
 }
