@@ -86,4 +86,10 @@ module.exports = {
       spin: 'spin.js'
     }
   },
+  node: {
+    console: true,
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty'
+  }
 };

@@ -1,392 +1,6 @@
-webpackJsonp([0],[
-/* 0 */,
-/* 1 */,
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
+webpackJsonp([0],{
 
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
- * Copyright (c) 2011-2014 Felix Gnass
- * Licensed under the MIT license
- * http://spin.js.org/
- *
- * Example:
-    var opts = {
-      lines: 12             // The number of lines to draw
-    , length: 7             // The length of each line
-    , width: 5              // The line thickness
-    , radius: 10            // The radius of the inner circle
-    , scale: 1.0            // Scales overall size of the spinner
-    , corners: 1            // Roundness (0..1)
-    , color: '#000'         // #rgb or #rrggbb
-    , opacity: 1/4          // Opacity of the lines
-    , rotate: 0             // Rotation offset
-    , direction: 1          // 1: clockwise, -1: counterclockwise
-    , speed: 1              // Rounds per second
-    , trail: 100            // Afterglow percentage
-    , fps: 20               // Frames per second when using setTimeout()
-    , zIndex: 2e9           // Use a high z-index by default
-    , className: 'spinner'  // CSS class to assign to the element
-    , top: '50%'            // center vertically
-    , left: '50%'           // center horizontally
-    , shadow: false         // Whether to render a shadow
-    , hwaccel: false        // Whether to use hardware acceleration (might be buggy)
-    , position: 'absolute'  // Element positioning
-    }
-    var target = document.getElementById('foo')
-    var spinner = new Spinner(opts).spin(target)
- */
-;(function (root, factory) {
-
-  /* CommonJS */
-  if (typeof module == 'object' && module.exports) module.exports = factory()
-
-  /* AMD module */
-  else if (true) !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
-
-  /* Browser global */
-  else root.Spinner = factory()
-}(this, function () {
-  "use strict"
-
-  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
-    , animations = {} /* Animation rules keyed by their name */
-    , useCssAnimations /* Whether to use CSS animations or setTimeout */
-    , sheet /* A stylesheet to hold the @keyframe or VML rules. */
-
-  /**
-   * Utility function to create elements. If no tag name is given,
-   * a DIV is created. Optionally properties can be passed.
-   */
-  function createEl (tag, prop) {
-    var el = document.createElement(tag || 'div')
-      , n
-
-    for (n in prop) el[n] = prop[n]
-    return el
-  }
-
-  /**
-   * Appends children and returns the parent.
-   */
-  function ins (parent /* child1, child2, ...*/) {
-    for (var i = 1, n = arguments.length; i < n; i++) {
-      parent.appendChild(arguments[i])
-    }
-
-    return parent
-  }
-
-  /**
-   * Creates an opacity keyframe animation rule and returns its name.
-   * Since most mobile Webkits have timing issues with animation-delay,
-   * we create separate rules for each line/segment.
-   */
-  function addAnimation (alpha, trail, i, lines) {
-    var name = ['opacity', trail, ~~(alpha * 100), i, lines].join('-')
-      , start = 0.01 + i/lines * 100
-      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
-      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
-      , pre = prefix && '-' + prefix + '-' || ''
-
-    if (!animations[name]) {
-      sheet.insertRule(
-        '@' + pre + 'keyframes ' + name + '{' +
-        '0%{opacity:' + z + '}' +
-        start + '%{opacity:' + alpha + '}' +
-        (start+0.01) + '%{opacity:1}' +
-        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
-        '100%{opacity:' + z + '}' +
-        '}', sheet.cssRules.length)
-
-      animations[name] = 1
-    }
-
-    return name
-  }
-
-  /**
-   * Tries various vendor prefixes and returns the first supported property.
-   */
-  function vendor (el, prop) {
-    var s = el.style
-      , pp
-      , i
-
-    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
-    if (s[prop] !== undefined) return prop
-    for (i = 0; i < prefixes.length; i++) {
-      pp = prefixes[i]+prop
-      if (s[pp] !== undefined) return pp
-    }
-  }
-
-  /**
-   * Sets multiple style properties at once.
-   */
-  function css (el, prop) {
-    for (var n in prop) {
-      el.style[vendor(el, n) || n] = prop[n]
-    }
-
-    return el
-  }
-
-  /**
-   * Fills in default values.
-   */
-  function merge (obj) {
-    for (var i = 1; i < arguments.length; i++) {
-      var def = arguments[i]
-      for (var n in def) {
-        if (obj[n] === undefined) obj[n] = def[n]
-      }
-    }
-    return obj
-  }
-
-  /**
-   * Returns the line color from the given string or array.
-   */
-  function getColor (color, idx) {
-    return typeof color == 'string' ? color : color[idx % color.length]
-  }
-
-  // Built-in defaults
-
-  var defaults = {
-    lines: 12             // The number of lines to draw
-  , length: 7             // The length of each line
-  , width: 5              // The line thickness
-  , radius: 10            // The radius of the inner circle
-  , scale: 1.0            // Scales overall size of the spinner
-  , corners: 1            // Roundness (0..1)
-  , color: '#000'         // #rgb or #rrggbb
-  , opacity: 1/4          // Opacity of the lines
-  , rotate: 0             // Rotation offset
-  , direction: 1          // 1: clockwise, -1: counterclockwise
-  , speed: 1              // Rounds per second
-  , trail: 100            // Afterglow percentage
-  , fps: 20               // Frames per second when using setTimeout()
-  , zIndex: 2e9           // Use a high z-index by default
-  , className: 'spinner'  // CSS class to assign to the element
-  , top: '50%'            // center vertically
-  , left: '50%'           // center horizontally
-  , shadow: false         // Whether to render a shadow
-  , hwaccel: false        // Whether to use hardware acceleration (might be buggy)
-  , position: 'absolute'  // Element positioning
-  }
-
-  /** The constructor */
-  function Spinner (o) {
-    this.opts = merge(o || {}, Spinner.defaults, defaults)
-  }
-
-  // Global defaults that override the built-ins:
-  Spinner.defaults = {}
-
-  merge(Spinner.prototype, {
-    /**
-     * Adds the spinner to the given target element. If this instance is already
-     * spinning, it is automatically removed from its previous target b calling
-     * stop() internally.
-     */
-    spin: function (target) {
-      this.stop()
-
-      var self = this
-        , o = self.opts
-        , el = self.el = createEl(null, {className: o.className})
-
-      css(el, {
-        position: o.position
-      , width: 0
-      , zIndex: o.zIndex
-      , left: o.left
-      , top: o.top
-      })
-
-      if (target) {
-        target.insertBefore(el, target.firstChild || null)
-      }
-
-      el.setAttribute('role', 'progressbar')
-      self.lines(el, self.opts)
-
-      if (!useCssAnimations) {
-        // No CSS animation support, use setTimeout() instead
-        var i = 0
-          , start = (o.lines - 1) * (1 - o.direction) / 2
-          , alpha
-          , fps = o.fps
-          , f = fps / o.speed
-          , ostep = (1 - o.opacity) / (f * o.trail / 100)
-          , astep = f / o.lines
-
-        ;(function anim () {
-          i++
-          for (var j = 0; j < o.lines; j++) {
-            alpha = Math.max(1 - (i + (o.lines - j) * astep) % f * ostep, o.opacity)
-
-            self.opacity(el, j * o.direction + start, alpha, o)
-          }
-          self.timeout = self.el && setTimeout(anim, ~~(1000 / fps))
-        })()
-      }
-      return self
-    }
-
-    /**
-     * Stops and removes the Spinner.
-     */
-  , stop: function () {
-      var el = this.el
-      if (el) {
-        clearTimeout(this.timeout)
-        if (el.parentNode) el.parentNode.removeChild(el)
-        this.el = undefined
-      }
-      return this
-    }
-
-    /**
-     * Internal method that draws the individual lines. Will be overwritten
-     * in VML fallback mode below.
-     */
-  , lines: function (el, o) {
-      var i = 0
-        , start = (o.lines - 1) * (1 - o.direction) / 2
-        , seg
-
-      function fill (color, shadow) {
-        return css(createEl(), {
-          position: 'absolute'
-        , width: o.scale * (o.length + o.width) + 'px'
-        , height: o.scale * o.width + 'px'
-        , background: color
-        , boxShadow: shadow
-        , transformOrigin: 'left'
-        , transform: 'rotate(' + ~~(360/o.lines*i + o.rotate) + 'deg) translate(' + o.scale*o.radius + 'px' + ',0)'
-        , borderRadius: (o.corners * o.scale * o.width >> 1) + 'px'
-        })
-      }
-
-      for (; i < o.lines; i++) {
-        seg = css(createEl(), {
-          position: 'absolute'
-        , top: 1 + ~(o.scale * o.width / 2) + 'px'
-        , transform: o.hwaccel ? 'translate3d(0,0,0)' : ''
-        , opacity: o.opacity
-        , animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1 / o.speed + 's linear infinite'
-        })
-
-        if (o.shadow) ins(seg, css(fill('#000', '0 0 4px #000'), {top: '2px'}))
-        ins(el, ins(seg, fill(getColor(o.color, i), '0 0 1px rgba(0,0,0,.1)')))
-      }
-      return el
-    }
-
-    /**
-     * Internal method that adjusts the opacity of a single line.
-     * Will be overwritten in VML fallback mode below.
-     */
-  , opacity: function (el, i, val) {
-      if (i < el.childNodes.length) el.childNodes[i].style.opacity = val
-    }
-
-  })
-
-
-  function initVML () {
-
-    /* Utility function to create a VML tag */
-    function vml (tag, attr) {
-      return createEl('<' + tag + ' xmlns="urn:schemas-microsoft.com:vml" class="spin-vml">', attr)
-    }
-
-    // No CSS transforms but VML support, add a CSS rule for VML elements:
-    sheet.addRule('.spin-vml', 'behavior:url(#default#VML)')
-
-    Spinner.prototype.lines = function (el, o) {
-      var r = o.scale * (o.length + o.width)
-        , s = o.scale * 2 * r
-
-      function grp () {
-        return css(
-          vml('group', {
-            coordsize: s + ' ' + s
-          , coordorigin: -r + ' ' + -r
-          })
-        , { width: s, height: s }
-        )
-      }
-
-      var margin = -(o.width + o.length) * o.scale * 2 + 'px'
-        , g = css(grp(), {position: 'absolute', top: margin, left: margin})
-        , i
-
-      function seg (i, dx, filter) {
-        ins(
-          g
-        , ins(
-            css(grp(), {rotation: 360 / o.lines * i + 'deg', left: ~~dx})
-          , ins(
-              css(
-                vml('roundrect', {arcsize: o.corners})
-              , { width: r
-                , height: o.scale * o.width
-                , left: o.scale * o.radius
-                , top: -o.scale * o.width >> 1
-                , filter: filter
-                }
-              )
-            , vml('fill', {color: getColor(o.color, i), opacity: o.opacity})
-            , vml('stroke', {opacity: 0}) // transparent stroke to fix color bleeding upon opacity change
-            )
-          )
-        )
-      }
-
-      if (o.shadow)
-        for (i = 1; i <= o.lines; i++) {
-          seg(i, -2, 'progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)')
-        }
-
-      for (i = 1; i <= o.lines; i++) seg(i)
-      return ins(el, g)
-    }
-
-    Spinner.prototype.opacity = function (el, i, val, o) {
-      var c = el.firstChild
-      o = o.shadow && o.lines || 0
-      if (c && i + o < c.childNodes.length) {
-        c = c.childNodes[i + o]; c = c && c.firstChild; c = c && c.firstChild
-        if (c) c.opacity = val
-      }
-    }
-  }
-
-  if (typeof document !== 'undefined') {
-    sheet = (function () {
-      var el = createEl('style', {type : 'text/css'})
-      ins(document.getElementsByTagName('head')[0], el)
-      return el.sheet || el.styleSheet
-    }())
-
-    var probe = css(createEl('group'), {behavior: 'url(#default#VML)'})
-
-    if (!vendor(probe, 'transform') && probe.adj) initVML()
-    else useCssAnimations = vendor(probe, 'animation')
-  }
-
-  return Spinner
-
-}));
-
-
-/***/ },
-/* 3 */,
-/* 4 */,
-/* 5 */
+/***/ 103:
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -518,10 +132,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     if ((typeof module === 'object') && module.exports) {
 		/* CommonJS module */
-		module.exports = factory(__webpack_require__(0), __webpack_require__(2));
+		module.exports = factory(__webpack_require__(6), __webpack_require__(39));
 	} else if (true) {
 		/* AMD module */
-		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(0), __webpack_require__(2)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(6), __webpack_require__(39)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	} else {
 		/* Browser global */
 		factory(root.angular, root.Spinner);
@@ -530,30 +144,34 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ },
-/* 6 */
+
+/***/ 104:
 /***/ function(module, exports, __webpack_require__) {
 
 /**
  * Created by alex_crack on 20.11.15.
  */
-__webpack_require__(15);
+__webpack_require__(116);
 module.exports = 'ui-notification';
 
 /***/ },
-/* 7 */
+
+/***/ 105:
 /***/ function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(17);
+module.exports = __webpack_require__(129);
 
 
 /***/ },
-/* 8 */
+
+/***/ 107:
 /***/ function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 
 /***/ },
-/* 9 */
+
+/***/ 109:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -563,47 +181,47 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _angular = __webpack_require__(0);
+var _angular = __webpack_require__(6);
 
 var _angular2 = _interopRequireDefault(_angular);
 
-var _products = __webpack_require__(45);
+var _products = __webpack_require__(229);
 
 var _products2 = _interopRequireDefault(_products);
 
-var _navbar = __webpack_require__(40);
+var _navbar = __webpack_require__(224);
 
 var _navbar2 = _interopRequireDefault(_navbar);
 
-var _productList = __webpack_require__(41);
+var _productList = __webpack_require__(225);
 
 var _productList2 = _interopRequireDefault(_productList);
 
-var _product = __webpack_require__(43);
+var _product = __webpack_require__(227);
 
 var _product2 = _interopRequireDefault(_product);
 
-var _categories = __webpack_require__(32);
+var _categories = __webpack_require__(216);
 
 var _categories2 = _interopRequireDefault(_categories);
 
-var _cart = __webpack_require__(30);
+var _cart = __webpack_require__(214);
 
 var _cart2 = _interopRequireDefault(_cart);
 
-var _cartButton = __webpack_require__(28);
+var _cartButton = __webpack_require__(212);
 
 var _cartButton2 = _interopRequireDefault(_cartButton);
 
-var _checkoutButton = __webpack_require__(34);
+var _checkoutButton = __webpack_require__(218);
 
 var _checkoutButton2 = _interopRequireDefault(_checkoutButton);
 
-var _checkout = __webpack_require__(36);
+var _checkout = __webpack_require__(220);
 
 var _checkout2 = _interopRequireDefault(_checkout);
 
-var _loginButton = __webpack_require__(38);
+var _loginButton = __webpack_require__(222);
 
 var _loginButton2 = _interopRequireDefault(_loginButton);
 
@@ -614,7 +232,8 @@ var ComponentsModule = _angular2.default.module('app.components', []).component(
 exports.default = ComponentsModule;
 
 /***/ },
-/* 10 */
+
+/***/ 110:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -624,31 +243,31 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _angular = __webpack_require__(0);
+var _angular = __webpack_require__(6);
 
 var _angular2 = _interopRequireDefault(_angular);
 
-var _products = __webpack_require__(52);
+var _products = __webpack_require__(236);
 
 var _products2 = _interopRequireDefault(_products);
 
-var _categories = __webpack_require__(50);
+var _categories = __webpack_require__(234);
 
 var _categories2 = _interopRequireDefault(_categories);
 
-var _cart = __webpack_require__(49);
+var _cart = __webpack_require__(233);
 
 var _cart2 = _interopRequireDefault(_cart);
 
-var _auth = __webpack_require__(48);
+var _auth = __webpack_require__(232);
 
 var _auth2 = _interopRequireDefault(_auth);
 
-var _access = __webpack_require__(47);
+var _access = __webpack_require__(231);
 
 var _access2 = _interopRequireDefault(_access);
 
-var _event = __webpack_require__(51);
+var _event = __webpack_require__(235);
 
 var _event2 = _interopRequireDefault(_event);
 
@@ -659,7 +278,8 @@ var ServicesModule = _angular2.default.module('app.services', []).service('Produ
 exports.default = ServicesModule;
 
 /***/ },
-/* 11 */
+
+/***/ 111:
 /***/ function(module, exports) {
 
 "use strict";
@@ -710,7 +330,8 @@ function routesConfig($stateProvider, $urlRouterProvider, $locationProvider) {
 }
 
 /***/ },
-/* 12 */
+
+/***/ 112:
 /***/ function(module, exports) {
 
 "use strict";
@@ -755,7 +376,8 @@ function run($transitions, AccessService, $log, EventService, usSpinnerService) 
 }
 
 /***/ },
-/* 13 */
+
+/***/ 113:
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -768,14 +390,14 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     if (typeof module !== 'undefined' && module.exports) {
         // CommonJS
         if (typeof angular === 'undefined') {
-            factory(__webpack_require__(0));
+            factory(__webpack_require__(6));
         } else {
             factory(angular);
         }
         module.exports = 'ngDialog';
     } else if (true) {
         // AMD
-        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(0)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(6)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
     } else {
         // Global Variables
         factory(root.angular);
@@ -1650,8 +1272,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ },
-/* 14 */,
-/* 15 */
+
+/***/ 116:
 /***/ function(module, exports) {
 
 /**
@@ -1898,74 +1520,85 @@ angular.module('ui-notification').provider('Notification', function() {
 angular.module("ui-notification").run(["$templateCache", function($templateCache) {$templateCache.put("angular-ui-notification.html","<div class=\"ui-notification\"><h3 ng-show=\"title\" ng-bind-html=\"title\"></h3><div class=\"message\" ng-bind-html=\"message\"></div></div>");}]);
 
 /***/ },
-/* 16 */,
-/* 17 */
+
+/***/ 129:
 /***/ function(module, exports) {
 
 
 
 /***/ },
-/* 18 */
+
+/***/ 184:
 /***/ function(module, exports) {
 
 module.exports = "<a ui-sref=\"cart\" class=\"cart-button\">\n  <span class=\"glyphicon glyphicon-shopping-cart\"></span>\n  <span class=\"count\" ng-if=\"$ctrl.count() > 0\">{{ $ctrl.count() }}</span>\n</a>\n";
 
 /***/ },
-/* 19 */
+
+/***/ 185:
 /***/ function(module, exports) {
 
 module.exports = "<div class=\"container\">\n  <div class=\"row\">\n    <div class=\"col-xs-12 col-sm-9\">\n\n    <div class=\"cart\">\n      <div class=\"cart-product thumbnail\" ng-repeat=\"product in $ctrl.products\">\n        <div class=\"title pull-left\">{{ product.name }}</div>\n        <div class=\"pull-right\">\n\n          <a class=\"btn btn-default btn-minus\" ng-click=\"$ctrl.down(product)\"><span class=\"glyphicon glyphicon-minus\"></span></a>\n          <div class=\"count\">{{ product.count }}</div>\n          <a class=\"btn btn-default btn-plus\" ng-click=\"$ctrl.up(product)\"><span class=\"glyphicon glyphicon-plus\"></span></a>\n\n          <div class =\"price\">{{ product.totalPrice | currency:\"$\" }}</div>\n        </div>\n        <div class=\"clearfix\"></div>\n        <a class=\"btn btn-danger btn-remove\" ng-click=\"$ctrl.remove(product)\"><span class=\"glyphicon glyphicon-remove\"></span></a>\n      </div>\n      <div class=\"total-price pull-right\">{{ $ctrl.totalPrice() | currency:\"$\" }}</div>\n    </div>\n\n    <div class=\"clearfix\"></div>\n    <hr>\n    <checkout-button class=\"pull-right\"></checkout-button>\n\n    </div>\n  </div>\n\n</div>\n";
 
 /***/ },
-/* 20 */
+
+/***/ 186:
 /***/ function(module, exports) {
 
 module.exports = "<div class=\"categories list-group\">\n  <!-- active -->\n  <div ng-repeat=\"cat in $ctrl.categories\">\n    <a href=\"#\" class=\"list-group-item\" ng-class=\"{ active: $ctrl.isActive(cat)}\" ng-click=\"$ctrl.select(cat)\">{{ cat.name }}</a>\n  </div>\n</div>\n";
 
 /***/ },
-/* 21 */
+
+/***/ 187:
 /***/ function(module, exports) {
 
 module.exports = "<a class=\"btn btn-success\" ng-click=\"$ctrl.checkout()\">\n  Checkout\n  <span class=\"glyphicon glyphicon-ok\"></span>\n</a>\n";
 
 /***/ },
-/* 22 */
+
+/***/ 188:
 /***/ function(module, exports) {
 
 module.exports = "<div class=\"container checkout\">\n\n  <div class=\"row\">\n\n    <div class=\"col-xs-12 col-sm-9\">\n      <button class=\"btn btn-info btn-buy\" ng-click=\"$ctrl.buy()\">Buy</button>\n    </div><!--/span-->\n\n  </div><!--/row-->\n\n</div>\n";
 
 /***/ },
-/* 23 */
+
+/***/ 189:
 /***/ function(module, exports) {
 
 module.exports = "<div ng-show=\"$ctrl.isAuthenticated()\">\n  <span class=\"glyphicon glyphicon-user\"></span>\n  <a ng-click=\"$ctrl.logout()\" href=\"\">Log Out</a>\n</div>\n\n<div ng-hide=\"$ctrl.isAuthenticated()\">\n  <a ng-click=\"$ctrl.login()\" href=\"\">Log In</a>\n</div>\n";
 
 /***/ },
-/* 24 */
+
+/***/ 190:
 /***/ function(module, exports) {
 
 module.exports = "<nav class=\"navbar navbar-default\" role=\"navigation\">\n  <div class=\"container\">\n    <div class=\"col-xs-12\">\n      <!-- Brand and toggle get grouped for better mobile display -->\n      <div class=\"navbar-header\">\n        <a ui-sref=\"products\" class=\"navbar-brand\" href=\"#\">Market</a>\n      </div>\n\n      <div class=\"navbar-right\">\n        <cart-button></cart-button>\n        <login-button></login-button>\n      </div>\n    </div>\n  </div><!-- /.container-fluid -->\n</nav>\n";
 
 /***/ },
-/* 25 */
+
+/***/ 191:
 /***/ function(module, exports) {
 
 module.exports = "<div class=\"row\">\n  <div ng-repeat=\"product in $ctrl.getProducts()\">\n    <div class=\"col-4 col-sm-4 col-lg-4\">\n      <product product=\"product\"></product>\n    </div><!--/span-->\n  </div>\n</div><!--/row-->\n";
 
 /***/ },
-/* 26 */
+
+/***/ 192:
 /***/ function(module, exports) {
 
 module.exports = "<h2>{{ $ctrl.product.name }}</h2>\n<p>{{ $ctrl.product.description }}</p>\n<p class=\"price\">{{ $ctrl.product.price | currency:\"$\" }}</p>\n<p><a class=\"btn btn-default btn-add-to-cart\" href=\"#\" role=\"button\" ng-click=\"$ctrl.addToCart()\">Add to cart</a></p>\n";
 
 /***/ },
-/* 27 */
+
+/***/ 193:
 /***/ function(module, exports) {
 
 module.exports = "<div class=\"container\">\n\n  <div class=\"row row-offcanvas row-offcanvas-right\">\n\n    <div class=\"col-xs-12 col-sm-9\">\n      <product-list filter-categories=\"$ctrl.filterCategories\" products=\"$ctrl.products\"></product-list>\n    </div><!--/span-->\n\n    <div class=\"col-xs-6 col-sm-3 sidebar-offcanvas\" id=\"sidebar\" role=\"navigation\">\n      <categories on-select=\"$ctrl.onSelectCategory($event)\"></categories>\n    </div><!--/span-->\n\n  </div><!--/row-->\n\n</div>\n";
 
 /***/ },
-/* 28 */
+
+/***/ 212:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1975,11 +1608,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _cartButton = __webpack_require__(29);
+var _cartButton = __webpack_require__(213);
 
 var _cartButton2 = _interopRequireDefault(_cartButton);
 
-var _cartButton3 = __webpack_require__(18);
+var _cartButton3 = __webpack_require__(184);
 
 var _cartButton4 = _interopRequireDefault(_cartButton3);
 
@@ -1993,7 +1626,8 @@ var CartButtonComponent = {
 exports.default = CartButtonComponent;
 
 /***/ },
-/* 29 */
+
+/***/ 213:
 /***/ function(module, exports) {
 
 "use strict";
@@ -2030,7 +1664,8 @@ var CartButtonController = function () {
 exports.default = CartButtonController;
 
 /***/ },
-/* 30 */
+
+/***/ 214:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2040,11 +1675,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _cart = __webpack_require__(31);
+var _cart = __webpack_require__(215);
 
 var _cart2 = _interopRequireDefault(_cart);
 
-var _cart3 = __webpack_require__(19);
+var _cart3 = __webpack_require__(185);
 
 var _cart4 = _interopRequireDefault(_cart3);
 
@@ -2061,7 +1696,8 @@ var CartComponent = {
 exports.default = CartComponent;
 
 /***/ },
-/* 31 */
+
+/***/ 215:
 /***/ function(module, exports) {
 
 "use strict";
@@ -2130,7 +1766,8 @@ var CartController = function () {
 exports.default = CartController;
 
 /***/ },
-/* 32 */
+
+/***/ 216:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2140,11 +1777,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _categories = __webpack_require__(33);
+var _categories = __webpack_require__(217);
 
 var _categories2 = _interopRequireDefault(_categories);
 
-var _categories3 = __webpack_require__(20);
+var _categories3 = __webpack_require__(186);
 
 var _categories4 = _interopRequireDefault(_categories3);
 
@@ -2161,7 +1798,8 @@ var CategoriesComponent = {
 exports.default = CategoriesComponent;
 
 /***/ },
-/* 33 */
+
+/***/ 217:
 /***/ function(module, exports) {
 
 "use strict";
@@ -2226,7 +1864,8 @@ function onSelect() {
 exports.default = CategoriesController;
 
 /***/ },
-/* 34 */
+
+/***/ 218:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2236,11 +1875,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _checkoutButton = __webpack_require__(35);
+var _checkoutButton = __webpack_require__(219);
 
 var _checkoutButton2 = _interopRequireDefault(_checkoutButton);
 
-var _checkoutButton3 = __webpack_require__(21);
+var _checkoutButton3 = __webpack_require__(187);
 
 var _checkoutButton4 = _interopRequireDefault(_checkoutButton3);
 
@@ -2254,7 +1893,8 @@ var CheckoutButtonComponent = {
 exports.default = CheckoutButtonComponent;
 
 /***/ },
-/* 35 */
+
+/***/ 219:
 /***/ function(module, exports) {
 
 "use strict";
@@ -2300,7 +1940,8 @@ var CheckoutButtonController = function () {
 exports.default = CheckoutButtonController;
 
 /***/ },
-/* 36 */
+
+/***/ 220:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2310,11 +1951,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _checkout = __webpack_require__(37);
+var _checkout = __webpack_require__(221);
 
 var _checkout2 = _interopRequireDefault(_checkout);
 
-var _checkout3 = __webpack_require__(22);
+var _checkout3 = __webpack_require__(188);
 
 var _checkout4 = _interopRequireDefault(_checkout3);
 
@@ -2328,7 +1969,8 @@ var CheckoutComponent = {
 exports.default = CheckoutComponent;
 
 /***/ },
-/* 37 */
+
+/***/ 221:
 /***/ function(module, exports) {
 
 "use strict";
@@ -2370,7 +2012,8 @@ var CheckoutController = function () {
 exports.default = CheckoutController;
 
 /***/ },
-/* 38 */
+
+/***/ 222:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2380,11 +2023,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _loginButton = __webpack_require__(39);
+var _loginButton = __webpack_require__(223);
 
 var _loginButton2 = _interopRequireDefault(_loginButton);
 
-var _loginButton3 = __webpack_require__(23);
+var _loginButton3 = __webpack_require__(189);
 
 var _loginButton4 = _interopRequireDefault(_loginButton3);
 
@@ -2398,7 +2041,8 @@ var LoginButtonComponent = {
 exports.default = LoginButtonComponent;
 
 /***/ },
-/* 39 */
+
+/***/ 223:
 /***/ function(module, exports) {
 
 "use strict";
@@ -2445,7 +2089,8 @@ var LoginButtonController = function () {
 exports.default = LoginButtonController;
 
 /***/ },
-/* 40 */
+
+/***/ 224:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2455,7 +2100,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _navbar = __webpack_require__(24);
+var _navbar = __webpack_require__(190);
 
 var _navbar2 = _interopRequireDefault(_navbar);
 
@@ -2468,7 +2113,8 @@ var NavbarComponent = {
 exports.default = NavbarComponent;
 
 /***/ },
-/* 41 */
+
+/***/ 225:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2478,11 +2124,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _productList = __webpack_require__(42);
+var _productList = __webpack_require__(226);
 
 var _productList2 = _interopRequireDefault(_productList);
 
-var _productList3 = __webpack_require__(25);
+var _productList3 = __webpack_require__(191);
 
 var _productList4 = _interopRequireDefault(_productList3);
 
@@ -2500,7 +2146,8 @@ var ProductListComponent = {
 exports.default = ProductListComponent;
 
 /***/ },
-/* 42 */
+
+/***/ 226:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2512,7 +2159,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _lodash = __webpack_require__(1);
+var _lodash = __webpack_require__(38);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -2569,7 +2216,8 @@ var ProductListController = function () {
 exports.default = ProductListController;
 
 /***/ },
-/* 43 */
+
+/***/ 227:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2579,11 +2227,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _product = __webpack_require__(44);
+var _product = __webpack_require__(228);
 
 var _product2 = _interopRequireDefault(_product);
 
-var _product3 = __webpack_require__(26);
+var _product3 = __webpack_require__(192);
 
 var _product4 = _interopRequireDefault(_product3);
 
@@ -2600,7 +2248,8 @@ var ProductComponent = {
 exports.default = ProductComponent;
 
 /***/ },
-/* 44 */
+
+/***/ 228:
 /***/ function(module, exports) {
 
 "use strict";
@@ -2639,7 +2288,8 @@ var ProductController = function () {
 exports.default = ProductController;
 
 /***/ },
-/* 45 */
+
+/***/ 229:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2649,11 +2299,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _products = __webpack_require__(46);
+var _products = __webpack_require__(230);
 
 var _products2 = _interopRequireDefault(_products);
 
-var _products3 = __webpack_require__(27);
+var _products3 = __webpack_require__(193);
 
 var _products4 = _interopRequireDefault(_products3);
 
@@ -2670,7 +2320,8 @@ var ProductsComponent = {
 exports.default = ProductsComponent;
 
 /***/ },
-/* 46 */
+
+/***/ 230:
 /***/ function(module, exports) {
 
 "use strict";
@@ -2704,7 +2355,8 @@ var ProductsController = function () {
 exports.default = ProductsController;
 
 /***/ },
-/* 47 */
+
+/***/ 231:
 /***/ function(module, exports) {
 
 "use strict";
@@ -2748,7 +2400,8 @@ var AccessService = function () {
 exports.default = AccessService;
 
 /***/ },
-/* 48 */
+
+/***/ 232:
 /***/ function(module, exports) {
 
 "use strict";
@@ -2835,7 +2488,8 @@ var AuthService = function () {
 exports.default = AuthService;
 
 /***/ },
-/* 49 */
+
+/***/ 233:
 /***/ function(module, exports) {
 
 "use strict";
@@ -2959,9 +2613,14 @@ var CartService = function () {
   }, {
     key: 'calcTotal',
     value: function calcTotal() {
+      var _this2 = this;
+
       this.totals.count = Object.keys(this.cart).length;
-      this.totals.price = Object.values(this.cart).reduce(function (sum, x) {
-        return sum + x.totalPrice;
+      var vals = Object.keys(this.cart).map(function (key) {
+        return parseInt(_this2.cart[key].totalPrice, 10);
+      });
+      this.totals.price = vals.reduce(function (sum, x) {
+        return sum + x;
       }, 0);
     }
   }, {
@@ -2980,7 +2639,8 @@ var CartService = function () {
 exports.default = CartService;
 
 /***/ },
-/* 50 */
+
+/***/ 234:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2992,7 +2652,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _lodash = __webpack_require__(1);
+var _lodash = __webpack_require__(38);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -3058,7 +2718,8 @@ var CategoriesService = function () {
 exports.default = CategoriesService;
 
 /***/ },
-/* 51 */
+
+/***/ 235:
 /***/ function(module, exports) {
 
 "use strict";
@@ -3105,7 +2766,8 @@ var EventService = function () {
 exports.default = EventService;
 
 /***/ },
-/* 52 */
+
+/***/ 236:
 /***/ function(module, exports) {
 
 "use strict";
@@ -3161,9 +2823,8 @@ var ProductsService = function () {
 exports.default = ProductsService;
 
 /***/ },
-/* 53 */,
-/* 54 */,
-/* 55 */
+
+/***/ 277:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3174,41 +2835,41 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.app = undefined;
 
-var _angular = __webpack_require__(0);
+var _angular = __webpack_require__(6);
 
 var _angular2 = _interopRequireDefault(_angular);
 
-__webpack_require__(4);
+__webpack_require__(41);
 
-__webpack_require__(3);
+__webpack_require__(40);
 
-__webpack_require__(13);
+__webpack_require__(113);
 
-__webpack_require__(2);
+__webpack_require__(39);
 
-__webpack_require__(5);
+__webpack_require__(103);
 
-__webpack_require__(6);
+__webpack_require__(104);
 
-var _routes = __webpack_require__(11);
+var _routes = __webpack_require__(111);
 
 var _routes2 = _interopRequireDefault(_routes);
 
-var _run = __webpack_require__(12);
+var _run = __webpack_require__(112);
 
 var _run2 = _interopRequireDefault(_run);
 
-var _servicesModule = __webpack_require__(10);
+var _servicesModule = __webpack_require__(110);
 
 var _servicesModule2 = _interopRequireDefault(_servicesModule);
 
-var _componentsModule = __webpack_require__(9);
+var _componentsModule = __webpack_require__(109);
 
 var _componentsModule2 = _interopRequireDefault(_componentsModule);
 
-__webpack_require__(8);
+__webpack_require__(107);
 
-__webpack_require__(7);
+__webpack_require__(105);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3220,5 +2881,390 @@ _angular2.default.module(app, ['ui.router', 'LocalStorageModule', 'ngDialog', 'a
   usSpinnerConfigProvider.setDefaults({ radius: 60 });
 }]).run(_run2.default);
 
+/***/ },
+
+/***/ 39:
+/***/ function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
+ * Copyright (c) 2011-2014 Felix Gnass
+ * Licensed under the MIT license
+ * http://spin.js.org/
+ *
+ * Example:
+    var opts = {
+      lines: 12             // The number of lines to draw
+    , length: 7             // The length of each line
+    , width: 5              // The line thickness
+    , radius: 10            // The radius of the inner circle
+    , scale: 1.0            // Scales overall size of the spinner
+    , corners: 1            // Roundness (0..1)
+    , color: '#000'         // #rgb or #rrggbb
+    , opacity: 1/4          // Opacity of the lines
+    , rotate: 0             // Rotation offset
+    , direction: 1          // 1: clockwise, -1: counterclockwise
+    , speed: 1              // Rounds per second
+    , trail: 100            // Afterglow percentage
+    , fps: 20               // Frames per second when using setTimeout()
+    , zIndex: 2e9           // Use a high z-index by default
+    , className: 'spinner'  // CSS class to assign to the element
+    , top: '50%'            // center vertically
+    , left: '50%'           // center horizontally
+    , shadow: false         // Whether to render a shadow
+    , hwaccel: false        // Whether to use hardware acceleration (might be buggy)
+    , position: 'absolute'  // Element positioning
+    }
+    var target = document.getElementById('foo')
+    var spinner = new Spinner(opts).spin(target)
+ */
+;(function (root, factory) {
+
+  /* CommonJS */
+  if (typeof module == 'object' && module.exports) module.exports = factory()
+
+  /* AMD module */
+  else if (true) !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
+
+  /* Browser global */
+  else root.Spinner = factory()
+}(this, function () {
+  "use strict"
+
+  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
+    , animations = {} /* Animation rules keyed by their name */
+    , useCssAnimations /* Whether to use CSS animations or setTimeout */
+    , sheet /* A stylesheet to hold the @keyframe or VML rules. */
+
+  /**
+   * Utility function to create elements. If no tag name is given,
+   * a DIV is created. Optionally properties can be passed.
+   */
+  function createEl (tag, prop) {
+    var el = document.createElement(tag || 'div')
+      , n
+
+    for (n in prop) el[n] = prop[n]
+    return el
+  }
+
+  /**
+   * Appends children and returns the parent.
+   */
+  function ins (parent /* child1, child2, ...*/) {
+    for (var i = 1, n = arguments.length; i < n; i++) {
+      parent.appendChild(arguments[i])
+    }
+
+    return parent
+  }
+
+  /**
+   * Creates an opacity keyframe animation rule and returns its name.
+   * Since most mobile Webkits have timing issues with animation-delay,
+   * we create separate rules for each line/segment.
+   */
+  function addAnimation (alpha, trail, i, lines) {
+    var name = ['opacity', trail, ~~(alpha * 100), i, lines].join('-')
+      , start = 0.01 + i/lines * 100
+      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
+      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
+      , pre = prefix && '-' + prefix + '-' || ''
+
+    if (!animations[name]) {
+      sheet.insertRule(
+        '@' + pre + 'keyframes ' + name + '{' +
+        '0%{opacity:' + z + '}' +
+        start + '%{opacity:' + alpha + '}' +
+        (start+0.01) + '%{opacity:1}' +
+        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
+        '100%{opacity:' + z + '}' +
+        '}', sheet.cssRules.length)
+
+      animations[name] = 1
+    }
+
+    return name
+  }
+
+  /**
+   * Tries various vendor prefixes and returns the first supported property.
+   */
+  function vendor (el, prop) {
+    var s = el.style
+      , pp
+      , i
+
+    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
+    if (s[prop] !== undefined) return prop
+    for (i = 0; i < prefixes.length; i++) {
+      pp = prefixes[i]+prop
+      if (s[pp] !== undefined) return pp
+    }
+  }
+
+  /**
+   * Sets multiple style properties at once.
+   */
+  function css (el, prop) {
+    for (var n in prop) {
+      el.style[vendor(el, n) || n] = prop[n]
+    }
+
+    return el
+  }
+
+  /**
+   * Fills in default values.
+   */
+  function merge (obj) {
+    for (var i = 1; i < arguments.length; i++) {
+      var def = arguments[i]
+      for (var n in def) {
+        if (obj[n] === undefined) obj[n] = def[n]
+      }
+    }
+    return obj
+  }
+
+  /**
+   * Returns the line color from the given string or array.
+   */
+  function getColor (color, idx) {
+    return typeof color == 'string' ? color : color[idx % color.length]
+  }
+
+  // Built-in defaults
+
+  var defaults = {
+    lines: 12             // The number of lines to draw
+  , length: 7             // The length of each line
+  , width: 5              // The line thickness
+  , radius: 10            // The radius of the inner circle
+  , scale: 1.0            // Scales overall size of the spinner
+  , corners: 1            // Roundness (0..1)
+  , color: '#000'         // #rgb or #rrggbb
+  , opacity: 1/4          // Opacity of the lines
+  , rotate: 0             // Rotation offset
+  , direction: 1          // 1: clockwise, -1: counterclockwise
+  , speed: 1              // Rounds per second
+  , trail: 100            // Afterglow percentage
+  , fps: 20               // Frames per second when using setTimeout()
+  , zIndex: 2e9           // Use a high z-index by default
+  , className: 'spinner'  // CSS class to assign to the element
+  , top: '50%'            // center vertically
+  , left: '50%'           // center horizontally
+  , shadow: false         // Whether to render a shadow
+  , hwaccel: false        // Whether to use hardware acceleration (might be buggy)
+  , position: 'absolute'  // Element positioning
+  }
+
+  /** The constructor */
+  function Spinner (o) {
+    this.opts = merge(o || {}, Spinner.defaults, defaults)
+  }
+
+  // Global defaults that override the built-ins:
+  Spinner.defaults = {}
+
+  merge(Spinner.prototype, {
+    /**
+     * Adds the spinner to the given target element. If this instance is already
+     * spinning, it is automatically removed from its previous target b calling
+     * stop() internally.
+     */
+    spin: function (target) {
+      this.stop()
+
+      var self = this
+        , o = self.opts
+        , el = self.el = createEl(null, {className: o.className})
+
+      css(el, {
+        position: o.position
+      , width: 0
+      , zIndex: o.zIndex
+      , left: o.left
+      , top: o.top
+      })
+
+      if (target) {
+        target.insertBefore(el, target.firstChild || null)
+      }
+
+      el.setAttribute('role', 'progressbar')
+      self.lines(el, self.opts)
+
+      if (!useCssAnimations) {
+        // No CSS animation support, use setTimeout() instead
+        var i = 0
+          , start = (o.lines - 1) * (1 - o.direction) / 2
+          , alpha
+          , fps = o.fps
+          , f = fps / o.speed
+          , ostep = (1 - o.opacity) / (f * o.trail / 100)
+          , astep = f / o.lines
+
+        ;(function anim () {
+          i++
+          for (var j = 0; j < o.lines; j++) {
+            alpha = Math.max(1 - (i + (o.lines - j) * astep) % f * ostep, o.opacity)
+
+            self.opacity(el, j * o.direction + start, alpha, o)
+          }
+          self.timeout = self.el && setTimeout(anim, ~~(1000 / fps))
+        })()
+      }
+      return self
+    }
+
+    /**
+     * Stops and removes the Spinner.
+     */
+  , stop: function () {
+      var el = this.el
+      if (el) {
+        clearTimeout(this.timeout)
+        if (el.parentNode) el.parentNode.removeChild(el)
+        this.el = undefined
+      }
+      return this
+    }
+
+    /**
+     * Internal method that draws the individual lines. Will be overwritten
+     * in VML fallback mode below.
+     */
+  , lines: function (el, o) {
+      var i = 0
+        , start = (o.lines - 1) * (1 - o.direction) / 2
+        , seg
+
+      function fill (color, shadow) {
+        return css(createEl(), {
+          position: 'absolute'
+        , width: o.scale * (o.length + o.width) + 'px'
+        , height: o.scale * o.width + 'px'
+        , background: color
+        , boxShadow: shadow
+        , transformOrigin: 'left'
+        , transform: 'rotate(' + ~~(360/o.lines*i + o.rotate) + 'deg) translate(' + o.scale*o.radius + 'px' + ',0)'
+        , borderRadius: (o.corners * o.scale * o.width >> 1) + 'px'
+        })
+      }
+
+      for (; i < o.lines; i++) {
+        seg = css(createEl(), {
+          position: 'absolute'
+        , top: 1 + ~(o.scale * o.width / 2) + 'px'
+        , transform: o.hwaccel ? 'translate3d(0,0,0)' : ''
+        , opacity: o.opacity
+        , animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1 / o.speed + 's linear infinite'
+        })
+
+        if (o.shadow) ins(seg, css(fill('#000', '0 0 4px #000'), {top: '2px'}))
+        ins(el, ins(seg, fill(getColor(o.color, i), '0 0 1px rgba(0,0,0,.1)')))
+      }
+      return el
+    }
+
+    /**
+     * Internal method that adjusts the opacity of a single line.
+     * Will be overwritten in VML fallback mode below.
+     */
+  , opacity: function (el, i, val) {
+      if (i < el.childNodes.length) el.childNodes[i].style.opacity = val
+    }
+
+  })
+
+
+  function initVML () {
+
+    /* Utility function to create a VML tag */
+    function vml (tag, attr) {
+      return createEl('<' + tag + ' xmlns="urn:schemas-microsoft.com:vml" class="spin-vml">', attr)
+    }
+
+    // No CSS transforms but VML support, add a CSS rule for VML elements:
+    sheet.addRule('.spin-vml', 'behavior:url(#default#VML)')
+
+    Spinner.prototype.lines = function (el, o) {
+      var r = o.scale * (o.length + o.width)
+        , s = o.scale * 2 * r
+
+      function grp () {
+        return css(
+          vml('group', {
+            coordsize: s + ' ' + s
+          , coordorigin: -r + ' ' + -r
+          })
+        , { width: s, height: s }
+        )
+      }
+
+      var margin = -(o.width + o.length) * o.scale * 2 + 'px'
+        , g = css(grp(), {position: 'absolute', top: margin, left: margin})
+        , i
+
+      function seg (i, dx, filter) {
+        ins(
+          g
+        , ins(
+            css(grp(), {rotation: 360 / o.lines * i + 'deg', left: ~~dx})
+          , ins(
+              css(
+                vml('roundrect', {arcsize: o.corners})
+              , { width: r
+                , height: o.scale * o.width
+                , left: o.scale * o.radius
+                , top: -o.scale * o.width >> 1
+                , filter: filter
+                }
+              )
+            , vml('fill', {color: getColor(o.color, i), opacity: o.opacity})
+            , vml('stroke', {opacity: 0}) // transparent stroke to fix color bleeding upon opacity change
+            )
+          )
+        )
+      }
+
+      if (o.shadow)
+        for (i = 1; i <= o.lines; i++) {
+          seg(i, -2, 'progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)')
+        }
+
+      for (i = 1; i <= o.lines; i++) seg(i)
+      return ins(el, g)
+    }
+
+    Spinner.prototype.opacity = function (el, i, val, o) {
+      var c = el.firstChild
+      o = o.shadow && o.lines || 0
+      if (c && i + o < c.childNodes.length) {
+        c = c.childNodes[i + o]; c = c && c.firstChild; c = c && c.firstChild
+        if (c) c.opacity = val
+      }
+    }
+  }
+
+  if (typeof document !== 'undefined') {
+    sheet = (function () {
+      var el = createEl('style', {type : 'text/css'})
+      ins(document.getElementsByTagName('head')[0], el)
+      return el.sheet || el.styleSheet
+    }())
+
+    var probe = css(createEl('group'), {behavior: 'url(#default#VML)'})
+
+    if (!vendor(probe, 'transform') && probe.adj) initVML()
+    else useCssAnimations = vendor(probe, 'animation')
+  }
+
+  return Spinner
+
+}));
+
+
 /***/ }
-],[55]);
+
+},[277]);
