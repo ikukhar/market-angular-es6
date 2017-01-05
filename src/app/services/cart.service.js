@@ -92,7 +92,10 @@ class CartService {
 
   calcTotal() {
     this.totals.count = Object.keys(this.cart).length;
-    this.totals.price = Object.values(this.cart).reduce(((sum, x) => sum + x.totalPrice), 0);
+    let vals = Object.keys(this.cart).map(key => {
+        return parseInt(this.cart[key].totalPrice, 10);
+      });
+    this.totals.price = vals.reduce(((sum, x) => sum + x), 0);
   }
 
   buy() {
