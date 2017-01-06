@@ -1,21 +1,10 @@
 $icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
-
 @import "~bootstrap-material-design/dist/css/bootstrap-material-design.min";
 @import "~bootstrap-material-design/dist/css/ripples.min";
-
 @import "~ng-dialog/css/ngDialog.min";
 @import "~ng-dialog/css/ngDialog-theme-default.min";
-
 @import "~angular-ui-notification/dist/angular-ui-notification";
-
-@import "app/components/categories/categories";
-@import "app/components/cart-button/cart-button";
-@import "app/components/cart/cart";
-@import "app/components/checkout-button/checkout-button";
-@import "app/components/login-button/login-button";
-@import "app/components/product/product";
-@import "app/components/checkout/checkout";
 
 body {
   // background-color: lightgrey;

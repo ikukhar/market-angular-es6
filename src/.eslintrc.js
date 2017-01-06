@@ -17,6 +17,7 @@ module.exports = {
     "no-unneeded-ternary": 0,
     "angular/no-private-call": 0,
     "no-return-assign": 0,
-    "angular/on-watch": 0
+    "angular/on-watch": 0,
+    "no-unused-vars": 0
   }
 }

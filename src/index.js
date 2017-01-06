@@ -8,8 +8,9 @@ import 'angular-ui-notification';
 
 import routesConfig from './routes';
 import run from './run';
-import ServicesModule from 'modules/services.module.js';
-import ComponentsModule from 'modules/components.module.js';
+import ServicesModule from './app/modules/services.module';
+import ComponentsModule from './app/modules/components.module';
+import PagesModule from './app/modules/pages.module';
 
 import './index.scss';
 import 'bootstrap-loader';
@@ -23,7 +24,8 @@ angular
                 'angularSpinner',
                 'ui-notification',
                 ServicesModule,
-                ComponentsModule])
+                ComponentsModule,
+                PagesModule])
   .config(routesConfig)
   .config(usSpinnerConfigProvider => {
     'ngInject';

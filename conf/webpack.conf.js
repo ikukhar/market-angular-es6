@@ -48,7 +48,8 @@ module.exports = {
           'html-loader'
         ]
       }
-    ]
+    ],
+    noParse: /node_modules\/(angular\/angular)/
   },
   plugins: [
     new webpack.optimize.OccurrenceOrderPlugin(),
@@ -64,7 +65,7 @@ module.exports = {
       debug: true
     })
   ],
-  devtool: 'source-map',
+  devtool: 'cheap-source-map',
   output: {
     path: path.join(process.cwd(), conf.paths.tmp),
     filename: 'index.js'
@@ -79,4 +80,5 @@ module.exports = {
       spin: 'spin.js'
     }
   },
+  profile: true,
 };
