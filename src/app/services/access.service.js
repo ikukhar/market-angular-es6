@@ -1,5 +1,6 @@
 class AccessService {
   constructor($q, AuthService) {
+    'ngInject';
     this.$q = $q;
     this.AuthService = AuthService;
     this.OK = 200;

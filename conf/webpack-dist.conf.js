@@ -57,10 +57,10 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: conf.path.src('index.html')
     }),
-    // new webpack.optimize.UglifyJsPlugin({
-    //   compress: {unused: true, dead_code: true, warnings: false},
-    //   output: {beautify: true}
-    // }),
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {unused: true, dead_code: true, warnings: false},
+      output: {beautify: false}
+    }),
     new ExtractTextPlugin('index-[contenthash].css'),
     new webpack.optimize.CommonsChunkPlugin({name: 'vendor'}),
     new webpack.LoaderOptionsPlugin({
